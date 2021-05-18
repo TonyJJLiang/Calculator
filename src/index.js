@@ -26,33 +26,94 @@ function Screen(props){
 
 class Calculator extends React.Component{
     constructor(props){
-        super(props)
+        super(props);
         this.state = {
             content:'',
         };
-        this.clearDisplay = this.clearDisplay.bind(this)
-        this.addToDisplay = this.addToDisplay.bind(this)
-        this.deleteCharacter = this.deleteCharacter.bind(this)
-        this.equals = this.equals.bind(this)
+        this.clearDisplay = this.clearDisplay.bind(this);
+        this.addToDisplay = this.addToDisplay.bind(this);
+        this.deleteCharacter = this.deleteCharacter.bind(this);
+        this.equals = this.equals.bind(this);
+        this.opList = ['+','-','*','/'];
+        this.opPosition = 0;
     }
 
     clearDisplay(blank){
+        this.opPosition = 0;
         this.setState({content:''})
     }
 
     addToDisplay(symbol){
         let newContent = this.state.content;
+        let length = newContent.length;
+        console.log(typeof newContent);
+
+        if (symbol === '-'){
+            //case: -
+            if(length === 0){
+            //case number-
+            } else if (!isNaN(newContent[length-1]) && !this.opPosition){
+                this.opPosition = length;
+            // case: number--
+            } else if(this.opPosition === length-1){
+                //allow
+            } else{
+                return;
+            }
+            newContent += symbol;
+            this.setState({content: newContent});
+            return;
+        }
+
+        if(this.opList.includes(symbol)){
+            if(length > 0 && !isNaN(newContent[length-1]) && !this.opPosition){
+                this.opPosition = length;
+            } else{
+                return 
+            }
+        }
+
         newContent += symbol;
-        this.setState({content: newContent})
+        this.setState({content: newContent});
     }
 
     deleteCharacter(blank){
-        let newContent = this.state.content.slice(0, -1);
-        this.setState({content: newContent})
+        if (this.state.content.length > 0){
+            let newContent = this.state.content.slice(0, -1);
+            this.setState({content: newContent})
+        }
     }
 
     equals(blank){
+        let content = this.state.content;
+        if (content.length >= 3){
+            if (this.opPosition && !isNaN(content[content.length-1])){
+                let arg1 = parseFloat(content.slice(0,this.opPosition));
+                let arg2 = parseFloat(content.slice(this.opPosition+1,content.length));
+                let op = content[this.opPosition];
+                let result;
+                switch (op){
+                    case '+':
+                        result =  arg1 + arg2;
+                        break;
+                    case '-':
+                        result = arg1 - arg2;
+                        break;
+                    case '*':
+                        result =  arg1 * arg2;
+                        break;
+                    case '/':
+                        result = arg1 / arg2;
+                        break;
+                    default:
+                        console.log('impossible');
+                }
 
+                result = result.toString();
+                this.opPosition = 0;
+                this.setState({content: result})
+            }
+        }
     }
 
     render(){
@@ -82,4 +143,4 @@ class Calculator extends React.Component{
     }
 }
 
-ReactDOM.render(<Calculator></Calculator>, document.getElementById('root'))
+ReactDOM.render(<Calculator></Calculator>, document.getElementById('root'));
